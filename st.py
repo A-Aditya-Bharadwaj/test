@@ -1,34 +1,15 @@
 import streamlit as st
-from googleapiclient.discovery import build
-
-# Set your API key
-API_KEY = "AIzaSyCahbpYK90MAmocUXpvi4BictBUjryJZo4"
-CX = "009a9cd036ce642b7"
-
-# Create a function to perform the Google search
-def google_search(query, num_results=10):
-    service = build("customsearch", "v1", developerKey=API_KEY)
-    results = service.cse().list(q=query, cx=CX, num=num_results).execute()
-    return results.get("items", [])
 
 # Create the Streamlit app
-st.title("Google Search App")
+st.title("Streamlit Web Browser")
 
-# Input for the search query
-query = st.text_input("Enter your search query:")
+# Input for the website URL
+website_url = st.text_input("Enter a website URL:")
 
-if st.button("Search"):
-    st.text("Searching...")
-
-    # Perform the search
-    results = google_search(query)
-
-    # Display search results
-    if results:
-        for result in results:
-            st.write(f"Title: {result['title']}")
-            st.write(f"Link: {result['link']}")
-            st.write(f"Snippet: {result['snippet']}")
-            st.write("----")
+# Button to open the website
+if st.button("Open Website"):
+    if website_url.startswith("http://") or website_url.startswith("https://"):
+        # Display the web browser component
+        st.components.v1.iframe(website_url, width=800, height=600)
     else:
-        st.warning("No results found.")
+        st.warning("Please enter a valid URL starting with 'http://' or 'https://'.")
