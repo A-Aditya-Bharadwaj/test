@@ -1,32 +1,46 @@
 import streamlit as st
-import os
 from pytube import YouTube
+import tempfile
+import os
 
+# Function to download a YouTube video
+def download_video(video_url):
+    try:
+        # Create a temporary directory to save the video
+        temp_dir = tempfile.mkdtemp()
+       
+        # Download the YouTube video
+        yt = YouTube(video_url)
+        stream = yt.streams.get_highest_resolution()
+        video_path = os.path.join(temp_dir, f"{yt.title}.mp4")
+        stream.download(output_path=temp_dir)
+
+        return video_path
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
+
+# Streamlit app
+st.title("YouTube Video Downloader and Player")
+
+# User input for YouTube video URL
 video_url = st.text_input("Enter the YouTube video URL:")
+
 if st.button("Download Video"):
-    st.text("Downloading...")
-    yt = YouTube(video_url)
-    stream = yt.streams.get_highest_resolution()
-    stream.download(output_path='downloads')  # Save the video to a 'downloads' folder
-    st.text("Download complete!")
+    if not video_url:
+        st.warning("Please enter a YouTube video URL.")
+    else:
+        st.text("Downloading video...")
+        video_path = download_video(video_url)
+        st.text("Download complete!")
 
-# Get the current directory
-current_directory = os.getcwd()
+# Display the list of downloaded videos
+downloaded_videos = [file for file in os.listdir(tempfile.gettempdir()) if file.endswith(".mp4")]
 
-# List all files in the current directory
-files = os.listdir(current_directory)
+if downloaded_videos:
+    selected_video = st.selectbox("Select a video to play:", downloaded_videos)
 
-# Filter out directories and display only files
-files = [file for file in files if os.path.isfile(os.path.join(current_directory, file))]
-
-# Display the list of files in Streamlit
-st.title("List of Files in Current Directory")
-if not files:
-    st.write("No files found in the current directory.")
+    if st.button("Play Selected Video"):
+        video_path = os.path.join(tempfile.gettempdir(), selected_video)
+        st.video(video_path)
 else:
-    for file in files:
-        st.write(file)
-
-if st.button("Play Video"):
-    path = st.text_input("path:")
-    st.video(path)  # Replace with the actual video filename
+    st.info("No downloaded videos found.")
