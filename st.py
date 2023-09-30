@@ -1,15 +1,32 @@
 import streamlit as st
+import os
+from pytube import YouTube
 
-# Create the Streamlit app
-st.title("Streamlit Web Browser")
+video_url = st.text_input("Enter the YouTube video URL:")
+if st.button("Download Video"):
+    st.text("Downloading...")
+    yt = YouTube(video_url)
+    stream = yt.streams.get_highest_resolution()
+    stream.download(output_path='downloads')  # Save the video to a 'downloads' folder
+    st.text("Download complete!")
 
-# Input for the website URL
-website_url = st.text_input("Enter a website URL:")
+# Get the current directory
+current_directory = os.getcwd()
 
-# Button to open the website
-if st.button("Open Website"):
-    if website_url.startswith("http://") or website_url.startswith("https://"):
-        # Display the web browser component
-        st.components.v1.iframe(website_url, width=800, height=600)
-    else:
-        st.warning("Please enter a valid URL starting with 'http://' or 'https://'.")
+# List all files in the current directory
+files = os.listdir(current_directory)
+
+# Filter out directories and display only files
+files = [file for file in files if os.path.isfile(os.path.join(current_directory, file))]
+
+# Display the list of files in Streamlit
+st.title("List of Files in Current Directory")
+if not files:
+    st.write("No files found in the current directory.")
+else:
+    for file in files:
+        st.write(file)
+
+if st.button("Play Video"):
+    path = st.text_input("path:")
+    st.video(path)  # Replace with the actual video filename
